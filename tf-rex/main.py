@@ -145,7 +145,7 @@ def main(_):
     summary_ops, summary_placeholders = setup_summary()
 
     # Initialize key objects: environment, agent and preprocessor
-    env = Environment("127.0.0.1", 9090)
+    env = Environment("0.0.0.0", 9090)
     agent = DDQNAgent(session, num_actions, width, height, FLAGS.logdir, writer)
     preprocessor = Preprocessor(width, height)
 
@@ -157,4 +157,5 @@ def main(_):
 
 
 if __name__ == '__main__':
+    tf.logging.set_verbosity(tf.logging.INFO)
     tf.app.run()
