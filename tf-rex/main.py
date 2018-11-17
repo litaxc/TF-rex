@@ -2,18 +2,16 @@ from agent import DDQNAgent
 from environment import Environment
 from preprocessor import Preprocessor
 from functools import partial
-import numpy as np
-import numpy.random as rnd
 import tensorflow as tf
 import os
 
-## Constants
+# Constants
 width = 80
 height = 80
 len_epoch = int(1E8)
 num_actions = len(Environment.actions)
 
-## Application flags
+# Application flags
 tf.app.flags.DEFINE_string("logdir", "./logs/", "Path to store the model and tensorboard logs or restore the model")
 tf.app.flags.DEFINE_string("checkpoint_nr", None, "Checkpoint number of the model to restore")
 tf.app.flags.DEFINE_integer("checkpoint_hz", 200, "Creating a checkpoint every x epochs")
@@ -81,6 +79,7 @@ def play(agent, env, preprocessor):
             state = next_state
 
         print("Crash")
+
 
 def train(agent, env, preprocessor, summarize_function):
     agent.update_target_network()
