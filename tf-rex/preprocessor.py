@@ -27,5 +27,5 @@ class Preprocessor:
         return self.state
 
     def get_updated_state(self, next_frame):
-        self.state =  np.array([*self.state[-3:], next_frame])
+        self.state = np.array([*self.state[-3:], next_frame])
         return self.state

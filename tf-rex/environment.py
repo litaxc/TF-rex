@@ -1,7 +1,11 @@
 from PIL import Image
 from io import BytesIO
 from websocket_server import WebsocketServer
-import base64, json, re, time, threading
+import base64
+import json
+import re
+import time
+import threading
 import multiprocessing
 import numpy as np
 
@@ -17,7 +21,7 @@ class Environment:
     Environment class is responsible for passing the actions to the game.
     It is also responsible for retrieving the game status and the reward.
     """
-    actions = {Action.UP:'UP', Action.FORWARD:'FORTH', Action.DOWN:'DOWN'}
+    actions = {Action.UP: 'UP', Action.FORWARD: 'FORTH', Action.DOWN: 'DOWN'}
 
     def __init__(self, host, port, debug=False):
         self.debug = debug
@@ -27,22 +31,24 @@ class Environment:
         self.server.set_fn_new_client(self.new_client)
         self.server.set_fn_message_received(self.new_message)
         print("\nGame can be connected (press F5 in Browser)")
-        thread = threading.Thread(target = self.server.run_forever)
+        thread = threading.Thread(target=self.server.run_forever)
         thread.daemon = True
         thread.start()
 
     def new_client(self, client, server):
-        if self.debug: print("GameAgent: Game just connected")
+        if self.debug:
+            print("GameAgent: Game just connected")
         self.game_client = client
-        self.server.send_message(self.game_client, "Connection to Game Agent Established");
+        self.server.send_message(self.game_client, "Connection to Game Agent Established")
 
     def new_message(self, client, server, message):
-        if self.debug: print("GameAgent: Incoming data from game")
+        if self.debug:
+            print("GameAgent: Incoming data from game")
         data = json.loads(message)
         image, crashed = data['world'], data['crashed']
 
         # remove data-info at the beginning of the image
-        image = re.sub('data:image/png;base64,', '',image)
+        image = re.sub('data:image/png;base64,', '', image)
         # convert image from base64 decoding to np array
         image = np.array(Image.open(BytesIO(base64.b64decode(image))))
 
@@ -61,14 +67,14 @@ class Environment:
         while self.game_client is None:
             time.sleep(1)
 
-        self.server.send_message(self.game_client, "START");
+        self.server.send_message(self.game_client, "START")
         time.sleep(4)
         return self.get_state(Action.FORWARD)
 
     def refresh_game(self):
         time.sleep(0.5)
         print("...refreshing game...")
-        self.server.send_message(self.game_client, "REFRESH");
+        self.server.send_message(self.game_client, "REFRESH")
         time.sleep(1)
 
     def do_action(self, action):
@@ -82,13 +88,13 @@ class Environment:
         """
         if action != Action.FORWARD:
             # noting needs to be send when the action is going forward
-            self.server.send_message(self.game_client, self.actions[action]);
+            self.server.send_message(self.game_client, self.actions[action])
 
         time.sleep(.05)
         return self.get_state(action)
 
     def get_state(self, action):
-        self.server.send_message(self.game_client, "STATE");
+        self.server.send_message(self.game_client, "STATE")
 
         image, crashed = self.queue.get()
 

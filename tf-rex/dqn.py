@@ -1,6 +1,4 @@
-import numpy as np
 import tensorflow as tf
-import random
 from functools import reduce
 
 
@@ -31,8 +29,8 @@ def linear(x, output_size, name, activation_fn=tf.nn.relu):
         b = tf.Variable(tf.zeros([output_size]), name='b')
         out = tf.nn.bias_add(tf.matmul(x, w), b)
 
-        if activation_fn != None:
-            out =  activation_fn(out)
+        if activation_fn:
+            out = activation_fn(out)
 
     return out, w, b
 
@@ -50,7 +48,6 @@ class DQN:
         self.summary_ops = []
         self._create_network()
         self.writer = writer
-
 
     def get_action_and_q(self, states):
         """
@@ -75,8 +72,9 @@ class DQN:
     def train(self, states, actions, targets, cnt):
         states = states.reshape(-1, 4, self.height, self.width)
         feed_dict = {self.state: states, self.actions: actions, self.Q_target: targets}
-        summary,_ = self.session.run([tf.summary.merge(self.summary_ops), self.minimize], feed_dict)
-        if self.writer: self.writer.add_summary(summary, global_step=cnt)
+        summary, _ = self.session.run([tf.summary.merge(self.summary_ops), self.minimize], feed_dict)
+        if self.writer:
+            self.writer.add_summary(summary, global_step=cnt)
 
     def tranfer_variables_from(self, other):
         """
@@ -89,12 +87,11 @@ class DQN:
 
         self.session.run(ops)
 
-
     def _create_network(self):
 
         with tf.variable_scope(self.name):
             # batchsize x memory x height x width
-            self.state =  tf.placeholder(shape=[None, 4, self.height, self.width],dtype=tf.float32)
+            self.state = tf.placeholder(shape=[None, 4, self.height, self.width], dtype=tf.float32)
             # batchsize x height x width x memory
             self.state_perm = tf.transpose(self.state, perm=[0, 2, 3, 1])
             self.summary_ops.append(tf.summary.image("states", self.state[:, 0, :, :][..., tf.newaxis], max_outputs=10))
